@@ -8,6 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>WorldClock</AssemblyName>
     <RootNamespace>WorldClock</RootNamespace>
+    <Copyright>Copyright (c) 2026 Brendon. MIT License.</Copyright>
   </PropertyGroup>
 
 </Project>

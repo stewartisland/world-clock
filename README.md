@@ -47,3 +47,7 @@ The app is written to `publish\WorldClock.exe`. Close any running copy before yo
 | `MainWindow.xaml` / `.cs` | Clock grid, drag-and-drop, add and remove, saving settings, and the `CityClock` model |
 | `AddClockWindow.xaml` / `.cs` | The "Add clock" dialog with time zone search |
 | `WorldClock.csproj` | Project file (targets `net9.0-windows` with WPF) |
+
+## License
+
+Released under the [MIT License](LICENSE). You're free to use, copy, modify and distribute it, including commercially, as long as you keep the copyright notice and licence text.
