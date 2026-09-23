@@ -1,10 +1,12 @@
 <Window x:Class="WorldClock.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="World Clock" Width="760" Height="520" MinWidth="420" MinHeight="300"
+        Title="World Clock" Width="780" Height="560" MinWidth="440" MinHeight="320"
         Background="#15171C" WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+
         <Style x:Key="Muted" TargetType="TextBlock">
             <Setter Property="Foreground" Value="#8A909C"/>
             <Setter Property="FontSize" Value="13"/>
@@ -30,11 +32,33 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="LinkButton" TargetType="Button">
+            <Setter Property="Foreground" Value="#7FA7F5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ContentPresenter/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <DockPanel Margin="16">
         <DockPanel DockPanel.Dock="Top" Margin="4,0,4,12">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                <Border CornerRadius="6" Background="#262B34" Margin="0,0,14,0" Padding="2">
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="CelsiusButton" Content="°C" Width="34" Padding="0,4"
+                                Style="{StaticResource FlatButton}" ToolTip="Show temperatures in Celsius"
+                                Click="Celsius_Click"/>
+                        <Button x:Name="FahrenheitButton" Content="°F" Width="34" Padding="0,4"
+                                Style="{StaticResource FlatButton}" ToolTip="Show temperatures in Fahrenheit"
+                                Click="Fahrenheit_Click"/>
+                    </StackPanel>
+                </Border>
                 <CheckBox x:Name="TopmostToggle" VerticalAlignment="Center" Margin="0,0,14,0"
                           Foreground="#8A909C" Content="Always on top"
                           Checked="TopmostToggle_Changed" Unchecked="TopmostToggle_Changed"/>
@@ -46,6 +70,13 @@
                 <TextBlock Text="Drag cards to reorder · right-click for more" Style="{StaticResource Muted}" FontSize="11"/>
             </StackPanel>
         </DockPanel>
+
+        <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Right" Margin="0,8,6,0"
+                   Style="{StaticResource Muted}" FontSize="11">
+            <Run Text="Weather:"/>
+            <Hyperlink NavigateUri="https://open-meteo.com/" RequestNavigate="Hyperlink_RequestNavigate"
+                       Foreground="#8A909C">Open-Meteo.com</Hyperlink>
+        </TextBlock>
 
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <ItemsControl x:Name="Clocks">
@@ -62,6 +93,9 @@
                                 MouseMove="Card_MouseMove" DragOver="Card_DragOver" Drop="Card_Drop">
                             <Border.ContextMenu>
                                 <ContextMenu>
+                                    <MenuItem Header="Rename…" Click="Rename_Click"/>
+                                    <MenuItem Header="Set location…" Click="SetLocation_Click"/>
+                                    <Separator/>
                                     <MenuItem Header="Move earlier" Click="MoveEarlier_Click"/>
                                     <MenuItem Header="Move later" Click="MoveLater_Click"/>
                                     <Separator/>
@@ -74,12 +108,26 @@
                                             Width="22" Height="22" Margin="8,0,0,0" Padding="0"
                                             Style="{StaticResource FlatButton}" Visibility="Hidden"
                                             ToolTip="Remove clock" Click="Remove_Click"/>
-                                    <TextBlock DockPanel.Dock="Right" Text="{Binding DayNight}" FontSize="16"/>
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding Icon}" FontSize="18" Foreground="#D6DAE1"
+                                               VerticalAlignment="Center"/>
                                     <TextBlock Text="{Binding City}" Foreground="White" FontSize="16"
                                                FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
                                 </DockPanel>
-                                <TextBlock Text="{Binding Time}" Foreground="White" FontSize="38"
-                                           FontWeight="Light" Margin="0,4,0,2"/>
+                                <DockPanel Margin="0,4,0,2">
+                                    <Grid DockPanel.Dock="Right" VerticalAlignment="Center" Margin="8,0,0,0">
+                                        <TextBlock x:Name="TemperatureText" Text="{Binding Temperature}"
+                                                   Foreground="White" FontSize="24" FontWeight="Light"
+                                                   ToolTip="Current temperature"
+                                                   Visibility="{Binding HasLocation, Converter={StaticResource BoolToVisibility}}"/>
+                                        <Button x:Name="SetLocationLink" Content="Set location…" FontSize="12"
+                                                Style="{StaticResource LinkButton}" Click="SetLocation_Click"
+                                                ToolTip="Choose a place to show weather for"/>
+                                    </Grid>
+                                    <TextBlock Text="{Binding Time}" Foreground="White" FontSize="38" FontWeight="Light"/>
+                                </DockPanel>
+                                <TextBlock Text="{Binding Place}" Style="{StaticResource Muted}" FontSize="11"
+                                           TextTrimming="CharacterEllipsis" Margin="0,0,0,2"
+                                           Visibility="{Binding HasLocation, Converter={StaticResource BoolToVisibility}}"/>
                                 <TextBlock Text="{Binding Date}" Style="{StaticResource Muted}"/>
                                 <TextBlock Text="{Binding Offset}" Style="{StaticResource Muted}" Margin="0,2,0,0"/>
                             </StackPanel>
@@ -89,6 +137,13 @@
                                 <Setter TargetName="RemoveButton" Property="Visibility" Value="Visible"/>
                                 <Setter TargetName="Card" Property="BorderBrush" Value="#3A4150"/>
                             </Trigger>
+                            <DataTrigger Binding="{Binding HasLocation}" Value="True">
+                                <Setter TargetName="SetLocationLink" Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsWeatherStale}" Value="True">
+                                <Setter TargetName="TemperatureText" Property="Opacity" Value="0.45"/>
+                                <Setter TargetName="TemperatureText" Property="ToolTip" Value="Couldn't update the weather recently"/>
+                            </DataTrigger>
                             <DataTrigger Binding="{Binding IsDragging}" Value="True">
                                 <Setter TargetName="Card" Property="Opacity" Value="0.4"/>
                                 <Setter TargetName="Card" Property="BorderBrush" Value="#5B8DEF"/>

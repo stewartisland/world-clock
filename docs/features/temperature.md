@@ -2,7 +2,7 @@
 
 | | |
 | --- | --- |
-| **Status** | Decisions made 23 Sep 2026 (see [Decisions](#decisions)). Not yet scheduled or built |
+| **Status** | Built 23 Sep 2026: all P0 requirements (W1–W6), plus renaming a clock. P1 items not started. Decisions: see [Decisions](#decisions) |
 | **Author** | Brendon |
 | **Date** | 23 Sep 2026 |
 | **Affects** | Clock card (`MainWindow.xaml`), `ClockConfig`, `AddClockWindow` (becomes a city search), new weather service |
@@ -133,7 +133,7 @@ Clocks without `Lat`/`Lon` are valid and show **Set location…**. Coordinates a
 
 | Decided | Still open |
 | --- | --- |
-| D-T1: Open-Meteo for weather and place search | Nothing blocking. Decided, **not yet scheduled** (no owner or start date) |
+| D-T1: Open-Meteo for weather and place search | Nothing blocking. All four decisions are built (23 Sep 2026) |
 | D-T2: Pick a place when adding. Existing clocks get a one-off lookup plus **Set location…** | |
 | D-T3: One °C/°F switch, default from the Windows region | |
 | D-T4: Temperature plus a weather icon that replaces ☀️/🌙 | |

@@ -1,12 +1,12 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.IO;
+using System.Diagnostics;
+using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Navigation;
 using System.Windows.Threading;
 
 namespace WorldClock;
@@ -22,28 +22,25 @@ public partial class MainWindow : Window
         set => SetValue(ColumnCountProperty, value);
     }
 
-    private static readonly string SettingsPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WorldClock", "clocks.json");
+    private static readonly Brush ActiveUnitBrush = new SolidColorBrush(Color.FromRgb(0x4A, 0x52, 0x60));
+    private static readonly Brush MutedBrush = new SolidColorBrush(Color.FromRgb(0x8A, 0x90, 0x9C));
 
-    private static readonly ClockConfig[] Defaults =
-    [
-        new("New Zealand", "New Zealand Standard Time"),
-        new("Croatia", "Central European Standard Time"),
-        new("UK", "GMT Standard Time"),
-        new("New York", "Eastern Standard Time"),
-        new("Dallas", "Central Standard Time"),
-        new("Seattle", "Pacific Standard Time"),
-    ];
-
+    private readonly SettingsService _settingsService = new();
+    private readonly AppSettings _settings;
+    private readonly IWeatherService _weather = OpenMeteoClient.Shared;
+    private readonly IPlaceSearch _placeSearch = OpenMeteoClient.Shared;
     private readonly ObservableCollection<CityClock> _clocks = [];
-    private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
+    private readonly DispatcherTimer _clockTimer = new() { Interval = TimeSpan.FromMilliseconds(250) };
+    private readonly DispatcherTimer _weatherTimer = new() { Interval = TimeSpan.FromMinutes(15) };
+    private bool _weatherBusy;
     private Point? _dragStart;
 
     public MainWindow()
     {
         InitializeComponent();
 
-        foreach (var config in LoadConfig())
+        _settings = _settingsService.Load();
+        foreach (var config in _settings.Clocks)
         {
             if (CityClock.TryCreate(config, out var clock))
                 _clocks.Add(clock);
@@ -52,9 +49,20 @@ public partial class MainWindow : Window
         Clocks.ItemsSource = _clocks;
         _clocks.CollectionChanged += (_, _) => { SaveConfig(); Refresh(); };
 
-        _timer.Tick += (_, _) => Refresh();
-        _timer.Start();
-        SizeChanged += (_, _) => ColumnCount = Math.Max(1, (int)(ActualWidth / 240));
+        _clockTimer.Tick += (_, _) => Refresh();
+        _clockTimer.Start();
+        _weatherTimer.Tick += async (_, _) => await RefreshWeatherAsync();
+        _weatherTimer.Start();
+
+        SizeChanged += (_, _) => ColumnCount = Math.Max(1, (int)(ActualWidth / 250));
+        Loaded += async (_, _) =>
+        {
+            if (!_settings.LocationLookupDone)
+                await LookUpMissingLocationsAsync();
+            await RefreshWeatherAsync();
+        };
+
+        ShowUnit();
         Refresh();
     }
 
@@ -62,43 +70,143 @@ public partial class MainWindow : Window
     {
         var now = DateTime.UtcNow;
         foreach (var clock in _clocks)
-            clock.Update(now);
-    }
-
-    private static IEnumerable<ClockConfig> LoadConfig()
-    {
-        try
-        {
-            if (File.Exists(SettingsPath))
-                return JsonSerializer.Deserialize<ClockConfig[]>(File.ReadAllText(SettingsPath)) ?? Defaults;
-        }
-        catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
-        {
-        }
-        return Defaults;
+            clock.Update(now, _settings.TemperatureUnit);
     }
 
     private void SaveConfig()
     {
+        _settings.Clocks = _clocks.Select(c => c.ToConfig()).ToList();
+        _settingsService.Save(_settings);
+    }
+
+    // Weather
+
+    private async Task RefreshWeatherAsync()
+    {
+        if (_weatherBusy) return;
+        var located = _clocks.Where(c => c.Location is not null).ToList();
+        if (located.Count == 0) return;
+
+        _weatherBusy = true;
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(SettingsPath)!);
-            var configs = _clocks.Select(c => new ClockConfig(c.City, c.TimeZoneId)).ToArray();
-            File.WriteAllText(SettingsPath, JsonSerializer.Serialize(configs, new JsonSerializerOptions { WriteIndented = true }));
+            var results = await _weather.GetCurrentAsync(located.Select(c => c.Location!.Value).ToList());
+            var now = DateTime.UtcNow;
+            for (var i = 0; i < located.Count && i < results.Count; i++)
+                located[i].SetWeather(results[i], now);
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException
+                                          or KeyNotFoundException or InvalidOperationException)
         {
+            // Keep showing the last known weather; it greys out, then clears, as it ages.
         }
+        finally
+        {
+            _weatherBusy = false;
+        }
+        Refresh();
     }
 
-    private void AddClock_Click(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// One-off lookup for clocks saved before locations existed. Clocks matching a default get the default's
+    /// place; others are looked up by label, and the result is kept only if it's in the clock's time zone.
+    /// </summary>
+    private async Task LookUpMissingLocationsAsync()
+    {
+        try
+        {
+            foreach (var clock in _clocks.Where(c => c.Location is null).ToList())
+            {
+                var match = SettingsService.Defaults.FirstOrDefault(d =>
+                    d.TimeZoneId == clock.TimeZoneId && string.Equals(d.City, clock.City, StringComparison.OrdinalIgnoreCase));
+                if (match is { Lat: { } lat, Lon: { } lon, Place: { } place })
+                {
+                    clock.SetLocation(lat, lon, place);
+                    continue;
+                }
+
+                var top = (await _placeSearch.SearchAsync(clock.City)).FirstOrDefault();
+                if (top is not null && top.TimeZoneId == clock.TimeZoneId)
+                    clock.SetLocation(top.Lat, top.Lon, top.DisplayName);
+            }
+            _settings.LocationLookupDone = true;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
+        {
+            // Offline: keep what was found and try the rest on the next launch.
+        }
+        SaveConfig();
+    }
+
+    // Header
+
+    private void Celsius_Click(object sender, RoutedEventArgs e) => SetUnit(TemperatureUnit.Celsius);
+
+    private void Fahrenheit_Click(object sender, RoutedEventArgs e) => SetUnit(TemperatureUnit.Fahrenheit);
+
+    private void SetUnit(TemperatureUnit unit)
+    {
+        _settings.TemperatureUnit = unit;
+        SaveConfig();
+        ShowUnit();
+        Refresh();
+    }
+
+    private void ShowUnit()
+    {
+        var celsius = _settings.TemperatureUnit == TemperatureUnit.Celsius;
+        CelsiusButton.Background = celsius ? ActiveUnitBrush : Brushes.Transparent;
+        FahrenheitButton.Background = celsius ? Brushes.Transparent : ActiveUnitBrush;
+        CelsiusButton.Foreground = celsius ? Brushes.White : MutedBrush;
+        FahrenheitButton.Foreground = celsius ? MutedBrush : Brushes.White;
+    }
+
+    private async void AddClock_Click(object sender, RoutedEventArgs e)
     {
         var dialog = new AddClockWindow { Owner = this };
-        if (dialog.ShowDialog() == true && CityClock.TryCreate(dialog.Result!, out var clock))
+        if (dialog.ShowDialog() == true && CityClock.TryCreate(dialog.ResultClock!, out var clock))
+        {
             _clocks.Add(clock);
+            await RefreshWeatherAsync();
+        }
     }
 
+    private void TopmostToggle_Changed(object sender, RoutedEventArgs e) =>
+        Topmost = TopmostToggle.IsChecked == true;
+
+    private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+    {
+        Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
+        e.Handled = true;
+    }
+
+    // Card commands
+
     private static CityClock? ClockFrom(object sender) => (sender as FrameworkElement)?.DataContext as CityClock;
+
+    private void Rename_Click(object sender, RoutedEventArgs e)
+    {
+        if (ClockFrom(sender) is not { } clock) return;
+        var dialog = new RenameWindow(clock.City) { Owner = this };
+        if (dialog.ShowDialog() == true)
+        {
+            clock.Rename(dialog.NewName);
+            SaveConfig();
+        }
+    }
+
+    private async void SetLocation_Click(object sender, RoutedEventArgs e)
+    {
+        if (ClockFrom(sender) is not { } clock) return;
+        var dialog = new AddClockWindow(setLocationFor: clock.City) { Owner = this };
+        if (dialog.ShowDialog() == true && dialog.ResultPlace is { } place)
+        {
+            clock.SetLocation(place.Lat, place.Lon, place.DisplayName);
+            SaveConfig();
+            Refresh();
+            await RefreshWeatherAsync();
+        }
+    }
 
     private void Remove_Click(object sender, RoutedEventArgs e)
     {
@@ -168,74 +276,8 @@ public partial class MainWindow : Window
         for (; element is not null; element = element is Visual ? VisualTreeHelper.GetParent(element) : null)
         {
             if (element is ButtonBase) return true;
-            if (element is Border { Name: "Card" }) return false;
+            if (element is System.Windows.Controls.Border { Name: "Card" }) return false;
         }
         return false;
     }
-
-    private void TopmostToggle_Changed(object sender, RoutedEventArgs e) =>
-        Topmost = TopmostToggle.IsChecked == true;
-}
-
-public sealed record ClockConfig(string City, string TimeZoneId);
-
-public sealed class CityClock : INotifyPropertyChanged
-{
-    private readonly TimeZoneInfo _zone;
-    private bool _isDragging;
-
-    private CityClock(string city, TimeZoneInfo zone)
-    {
-        City = city;
-        _zone = zone;
-    }
-
-    public static bool TryCreate(ClockConfig config, out CityClock clock)
-    {
-        clock = null!;
-        try
-        {
-            clock = new CityClock(config.City, TimeZoneInfo.FindSystemTimeZoneById(config.TimeZoneId));
-            return true;
-        }
-        catch (Exception ex) when (ex is TimeZoneNotFoundException or InvalidTimeZoneException)
-        {
-            return false;
-        }
-    }
-
-    public string City { get; }
-    public string TimeZoneId => _zone.Id;
-    public string Time { get; private set; } = "";
-    public string Date { get; private set; } = "";
-    public string Offset { get; private set; } = "";
-    public string DayNight { get; private set; } = "";
-
-    public bool IsDragging
-    {
-        get => _isDragging;
-        set { _isDragging = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDragging))); }
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    public void Update(DateTime utcNow)
-    {
-        var local = TimeZoneInfo.ConvertTimeFromUtc(utcNow, _zone);
-        var offset = _zone.GetUtcOffset(utcNow);
-        var diff = offset - TimeZoneInfo.Local.GetUtcOffset(utcNow);
-
-        Time = local.ToString("h:mm tt");
-        Date = local.ToString("dddd, d MMM");
-        Offset = $"UTC{FormatSpan(offset)} · {DescribeDiff(diff)}";
-        DayNight = local.Hour is >= 6 and < 18 ? "☀️" : "🌙";
-
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
-    }
-
-    private static string FormatSpan(TimeSpan t) =>
-        (t < TimeSpan.Zero ? "-" : "+") + t.Duration().ToString(t.Minutes == 0 ? "%h" : @"h\:mm");
-
-    private static string DescribeDiff(TimeSpan d) =>
-        d == TimeSpan.Zero ? "same as you" : $"{FormatSpan(d)}h from you";
 }
