@@ -13,9 +13,15 @@ dotnet publish WorldClock.csproj -c Release -r win-x64 --self-contained false -p
 
 Close any running `WorldClock.exe` before publishing, because it locks the file.
 
+Run the tests before committing:
+
+```powershell
+dotnet test tests/WorldClock.Tests/WorldClock.Tests.csproj
+```
+
 ## Releasing: bump the version every time
 
-Every change shipped to `main` gets a version bump, using Major.Minor:
+Every change to the app shipped to `main` gets a version bump, using Major.Minor. Changes that only touch documentation don't need one.
 
 - **minor** for features, improvements and fixes
 - **major** for big or breaking changes (for example, raising `AppSettings.CurrentVersion`)

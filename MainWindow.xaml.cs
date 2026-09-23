@@ -48,7 +48,13 @@ public partial class MainWindow : Window
 
         Topmost = _settings.AlwaysOnTop;
         Clocks.ItemsSource = _clocks;
-        _clocks.CollectionChanged += (_, _) => { SaveConfig(); Refresh(); };
+        _clocks.CollectionChanged += (_, _) =>
+        {
+            if (_applyingRemote) return;
+            SaveConfig();
+            Refresh();
+        };
+        InitializeSync();
 
         _clockTimer.Tick += (_, _) => Refresh();
         _clockTimer.Start();
@@ -61,6 +67,7 @@ public partial class MainWindow : Window
             if (!_settings.LocationLookupDone)
                 await LookUpMissingLocationsAsync();
             await RefreshWeatherAsync();
+            await _sync.StartAsync();
         };
 
         Refresh();
@@ -71,12 +78,15 @@ public partial class MainWindow : Window
         var now = DateTime.UtcNow;
         foreach (var clock in _clocks)
             clock.Update(now, _settings.TemperatureUnit);
+        if (_sync.State == Sync.SyncState.Synced)
+            ShowSyncStatus(); // keeps "Synced 5 min ago" current
     }
 
     private void SaveConfig()
     {
         _settings.Clocks = _clocks.Select(c => c.ToConfig()).ToList();
         _settingsService.Save(_settings);
+        _sync.LocalChanged();
     }
 
     // Weather
@@ -158,6 +168,7 @@ public partial class MainWindow : Window
         SystemThemeItem.IsChecked = _settings.Theme is null;
         TopmostItem.IsChecked = Topmost;
         VersionItem.Header = $"Version {AppInfo.Version}";
+        UpdateSyncMenu();
     }
 
     private void Celsius_Click(object sender, RoutedEventArgs e) => SetUnit(TemperatureUnit.Celsius);

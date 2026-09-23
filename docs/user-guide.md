@@ -39,6 +39,21 @@ Everything apart from adding a clock is in the **⋯** menu in the top-right cor
 | Version | The version you're running, such as **Version 1.2**. See the [changelog](../CHANGELOG.md) for what changed in each version |
 | About World Clock | The app version, and links to the [World Clock blog post](https://www.brendonford.com/world-clock), the [source code on GitHub](https://github.com/stewartisland/world-clock) and [Open-Meteo](https://open-meteo.com/), which provides the weather data |
 
+## Sync with your Microsoft account
+
+Sign in with a personal Microsoft account (Outlook.com, Hotmail, Live or Xbox) to keep the same clocks on every PC where you use World Clock.
+
+1. Open the **⋯** menu and choose **Sign in with Microsoft…**.
+2. Pick your account in the Windows sign-in window and approve access. World Clock only asks for **its own folder** in your OneDrive (`OneDrive\Apps\World Clock`). It can't see any of your other files.
+3. If this PC's clocks differ from ones you've already saved from another PC, you're asked which to keep: **Use saved clocks** or **Keep this PC's clocks**. The set you don't keep is saved as a backup. **Cancel** signs you out without changing anything.
+
+After that, changes save automatically a couple of seconds after you make them. Changes from your other PCs appear when you open World Clock or switch back to its window. The bottom left of the window shows the sync status: **Synced just now**, **Syncing…**, **Offline, changes will sync**, or **Sign in again to keep syncing**.
+
+- **What syncs:** your clocks and their order, the temperature unit and the theme. **Always on top** is set separately on each PC.
+- **Two PCs changed at once:** the most recent change wins, and the other set is saved to `clocks.backup.json` next to `clocks.json`.
+- **Sign out** (⋯ menu) keeps your clocks on this PC and leaves the saved copy in OneDrive. Your settings are never stored anywhere except this PC and your own OneDrive.
+- Work and school accounts aren't supported yet.
+
 ## Adding a clock
 
 1. Click **+ Add clock** in the top-right corner.
@@ -141,6 +156,9 @@ If the file can't be read at all, the app falls back to the defaults.
 | The weather is for the wrong place | Right-click the card → **Set location…** |
 | City search says it can't reach place search | You're offline, or open-meteo.com is unavailable. Use **Choose time zone manually** |
 | A clock disappeared after editing `clocks.json` | Its `TimeZoneId` is misspelled or unknown. Check it against `tzutil /l` |
+| **Sign in with Microsoft…** is greyed out | Sync isn't set up in this build of World Clock (it needs an app registration; see the developer guide) |
+| "Sign in again to keep syncing" | Your sign-in expired or was removed. Open the ⋯ menu and choose **Sign in again…** |
+| Clocks changed unexpectedly after syncing | Another PC saved a newer change. The set that was replaced is in `%APPDATA%\WorldClock\clocks.backup.json` |
 | The hours "from you" value looks wrong | It's calculated from your computer's time zone. Check it in Windows Settings → Time & language → Date & time |
 
 Weather and place data: [Open-Meteo.com](https://open-meteo.com/), CC BY 4.0.

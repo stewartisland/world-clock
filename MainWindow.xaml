@@ -56,6 +56,13 @@
                         AutomationProperties.Name="More options" Click="More_Click">
                     <Button.ContextMenu>
                         <ContextMenu x:Name="MoreMenu" Placement="Custom" Opened="MoreMenu_Opened">
+                            <MenuItem Header="Sync" IsEnabled="False"/>
+                            <MenuItem x:Name="AccountItem" IsEnabled="False"/>
+                            <MenuItem x:Name="SignInItem" Header="Sign in with Microsoft…" Click="SignIn_Click"
+                                      ToolTipService.ShowOnDisabled="True"/>
+                            <MenuItem x:Name="SyncNowItem" Header="Sync now" Click="SyncNow_Click"/>
+                            <MenuItem x:Name="SignOutItem" Header="Sign out" Click="SignOut_Click"/>
+                            <Separator/>
                             <MenuItem Header="Temperature" IsEnabled="False"/>
                             <MenuItem x:Name="CelsiusItem" Header="Celsius (°C)" Click="Celsius_Click"/>
                             <MenuItem x:Name="FahrenheitItem" Header="Fahrenheit (°F)" Click="Fahrenheit_Click"/>
@@ -79,12 +86,15 @@
             </StackPanel>
         </DockPanel>
 
-        <TextBlock DockPanel.Dock="Bottom" HorizontalAlignment="Right" Margin="0,8,6,0"
-                   Style="{StaticResource Muted}" FontSize="11">
-            <Run Text="Weather:"/>
-            <Hyperlink NavigateUri="https://open-meteo.com/" RequestNavigate="Hyperlink_RequestNavigate"
-                       Foreground="{DynamicResource TextMutedBrush}">Open-Meteo.com</Hyperlink>
-        </TextBlock>
+        <DockPanel DockPanel.Dock="Bottom" Margin="6,8,6,0">
+            <TextBlock DockPanel.Dock="Right" Style="{StaticResource Muted}" FontSize="11">
+                <Run Text="Weather:"/>
+                <Hyperlink NavigateUri="https://open-meteo.com/" RequestNavigate="Hyperlink_RequestNavigate"
+                           Foreground="{DynamicResource TextMutedBrush}">Open-Meteo.com</Hyperlink>
+            </TextBlock>
+            <!-- Sync status; empty when not signed in. -->
+            <TextBlock x:Name="SyncStatusText" Style="{StaticResource Muted}" FontSize="11"/>
+        </DockPanel>
 
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <ItemsControl x:Name="Clocks">

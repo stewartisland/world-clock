@@ -2,7 +2,7 @@
 
 | | |
 | --- | --- |
-| **Status** | Decisions made 23 Sep 2026 (see [Decisions](#decisions)). Not yet scheduled or built |
+| **Status** | Phases 1–2 (Microsoft sign-in and OneDrive sync) built 23 Sep 2026, on branch `feature/microsoft-sign-in`, waiting for the Entra app registration's client ID before end-to-end testing. Phase 3 (Google) not started. See [Implementation notes](#implementation-notes) |
 | **Author** | Brendon |
 | **Date** | 23 Sep 2026 |
 | **Affects** | `MainWindow` (persistence and header UI), new auth and sync services, `AddClockWindow` (unchanged) |
@@ -243,6 +243,16 @@ These had a standard answer or could be looked up, so no decision was needed. An
 - **Q4, privacy statement and homepage:** a GitHub Pages site at `stewartisland.github.io/world-clock`. It's free, and Google can verify you own it for the OAuth consent screen. Needed before the Google release only.
 - **Q5, Google verification:** not blocking. Google's Drive API scope guide (developers.google.com/workspace/drive/api/guides/api-specific-auth, read 23 Sep 2026) lists `drive.appdata` as a **non-sensitive, recommended** scope that needs only basic OAuth app verification. The 100-user limit for unverified apps covers sensitive and restricted scopes, so it doesn't apply.
 - **Q7, Google client secret:** keep it in a file git ignores and add it into release builds. Forks register their own Google client. Document this in the developer guide when the Google work starts.
+
+## Implementation notes
+
+Built for Microsoft (phases 1–2). Where the build differs from the requirements above:
+
+- **R10, header UI:** the header had already been reduced to **+ Add clock** and **⋯** (release 1.2), so sign-in lives in a **Sync** section at the top of the ⋯ menu: **Sign in with Microsoft…**, or, when signed in, the account email, **Sync now** and **Sign out**. The status line is at the bottom left of the window instead of under the title.
+- **What syncs:** clocks, as specified, plus the temperature unit and theme (part of P1-2). **Always on top** stays per-PC.
+- **Conflict handling (R7):** the rule is as specified (newest `updatedAt` wins, with If-Match on the eTag). The replaced copy is written to `clocks.backup.json` whenever this PC had changes that hadn't been uploaded yet.
+- **Tests:** `tests/WorldClock.Tests` covers every R5/R7 path against an in-memory store, including a conflict partway through an upload and a queued change surviving a restart.
+- **Still to verify with a real account:** the WAM sign-in prompt, Graph `approot` read/write, and the token cache. These need the client ID.
 
 ## Timeline and phasing
 

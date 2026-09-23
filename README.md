@@ -4,10 +4,13 @@ A small Windows desktop app that shows the current time and weather in several c
 
 It opens with six clocks: New Zealand, Croatia, UK, New York, Dallas and Seattle. You can add, remove, rename and reorder clocks, and your layout is kept between launches.
 
+**[About this project](docs/about.md)** explains why it exists, how it was built, and the reasoning behind its design decisions.
+
 ## Features
 
 - A card for each clock showing the time, current temperature, a weather icon, the place the weather is for, the day and date, the UTC offset, and how many hours it is from your own time
-- A tidy header with **+ Add clock** and a **⋯** menu for everything else: °C / °F, Light / Dark / Use Windows setting, Always on top, and About
+- **Sync with your Microsoft account:** the same clocks on every PC, saved to a private folder in your own OneDrive. There's no World Clock server
+- A tidy header with **+ Add clock** and a **⋯** menu for everything else: sync, °C / °F, Light / Dark / Use Windows setting, Always on top, and About
 - **+ Add clock**: type a city name and the time zone is chosen for you. There's also a manual time zone list for places the search can't find
 - Right-click a card to **Rename…**, **Set location…** (which place the weather is for), move it or remove it
 - Drag cards to reorder them
@@ -21,7 +24,8 @@ It opens with six clocks: New Zealand, Croatia, UK, New York, Dallas and Seattle
 - Windows 10 or 11
 - [.NET 9 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/9.0) to run the app
 - .NET 9 SDK to build it
-- An internet connection for weather and city search. The clocks work without one
+- An internet connection for weather, city search and sync. The clocks work without one
+- A personal Microsoft account, if you want sync (optional)
 
 ## Quick start
 
@@ -39,10 +43,11 @@ The app is written to `publish\WorldClock.exe`. Close any running copy before yo
 
 ## Documentation
 
+- [About this project](docs/about.md): why it exists, how it was built, and the design decisions
 - [User guide](docs/user-guide.md): how to use the app, where settings are stored and how to reset them
 - [Developer guide](docs/developer-guide.md): project layout, how the app works and how to change it
 - [Changelog](CHANGELOG.md): what changed in each version
-- Feature definitions: [temperature](docs/features/temperature.md) (built), [sign in and sync](docs/features/cloud-sign-in.md) (planned)
+- Feature definitions: [temperature](docs/features/temperature.md) (built), [sign in and sync](docs/features/cloud-sign-in.md) (Microsoft built, Google planned)
 
 ## Project layout
 
@@ -58,6 +63,8 @@ The app is written to `publish\WorldClock.exe`. Close any running copy before yo
 | `SettingsService.cs` | Loads and saves `clocks.json`, including migrating older files. Holds the default clocks |
 | `OpenMeteo.cs` | Weather and place search from Open-Meteo, behind `IWeatherService` / `IPlaceSearch` |
 | `Models.cs` | `ClockConfig`, `AppSettings`, `PlaceResult`, `CurrentWeather` |
+| `Sync/`, `MainWindow.Sync.cs` | Microsoft sign-in (MSAL) and OneDrive sync, the first-sign-in choice dialog, and the ⋯ menu's Sync section |
+| `tests/WorldClock.Tests` | xUnit tests for settings and sync logic (`dotnet test tests/WorldClock.Tests/WorldClock.Tests.csproj`) |
 | `WorldClock.csproj` | Project file (targets `net9.0-windows` with WPF). Holds the app version |
 | `scripts/bump-version.ps1` | Raises the version (major or minor) and updates `CHANGELOG.md` |
 

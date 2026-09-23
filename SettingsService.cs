@@ -9,8 +9,18 @@ namespace WorldClock;
 /// <summary>Reads and writes %APPDATA%\WorldClock\clocks.json, migrating the old bare-array format.</summary>
 public sealed class SettingsService
 {
-    private static readonly string SettingsPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WorldClock", "clocks.json");
+    private static readonly string DefaultDirectory = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WorldClock");
+
+    private readonly string _settingsPath;
+    private readonly string _backupPath;
+
+    /// <param name="directory">Where clocks.json is kept; defaults to %APPDATA%\WorldClock.</param>
+    public SettingsService(string? directory = null)
+    {
+        _settingsPath = Path.Combine(directory ?? DefaultDirectory, "clocks.json");
+        _backupPath = Path.Combine(directory ?? DefaultDirectory, "clocks.backup.json");
+    }
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -37,8 +47,8 @@ public sealed class SettingsService
     {
         try
         {
-            if (File.Exists(SettingsPath))
-                return Parse(File.ReadAllText(SettingsPath));
+            if (File.Exists(_settingsPath))
+                return Parse(File.ReadAllText(_settingsPath));
         }
         catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException or NotSupportedException)
         {
@@ -46,16 +56,39 @@ public sealed class SettingsService
         return CreateDefault();
     }
 
-    public void Save(AppSettings settings)
+    /// <summary>
+    /// Writes the settings file. A local change stamps <c>updatedAt</c> and <c>deviceName</c>; settings arriving
+    /// from sync pass <paramref name="isLocalChange"/> false to keep the timestamp of the device that made them.
+    /// </summary>
+    public void Save(AppSettings settings, bool isLocalChange = true)
     {
         if (!CanSave) return;
-        try
+        settings.Version = AppSettings.CurrentVersion;
+        if (isLocalChange)
         {
-            settings.Version = AppSettings.CurrentVersion;
             settings.UpdatedAt = DateTimeOffset.UtcNow;
             settings.DeviceName = Environment.MachineName;
-            Directory.CreateDirectory(Path.GetDirectoryName(SettingsPath)!);
-            File.WriteAllText(SettingsPath, JsonSerializer.Serialize(settings, JsonOptions));
+        }
+        Write(_settingsPath, settings);
+    }
+
+    /// <summary>Saves a copy that's about to be replaced by sync, as clocks.backup.json next to clocks.json.</summary>
+    public void SaveBackup(AppSettings settings) => Write(_backupPath, settings);
+
+    public static string Serialize(AppSettings settings) => JsonSerializer.Serialize(settings, JsonOptions);
+
+    /// <summary>Parses a version-1-or-later settings file, such as the synced copy.</summary>
+    public static AppSettings Deserialize(string json) =>
+        JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? throw new JsonException("Empty settings file.");
+
+    public static bool IsDefaultClocks(IEnumerable<ClockConfig> clocks) => clocks.SequenceEqual(Defaults);
+
+    private static void Write(string path, AppSettings settings)
+    {
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            File.WriteAllText(path, Serialize(settings));
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -71,7 +104,7 @@ public sealed class SettingsService
         {
             return new AppSettings
             {
-                UpdatedAt = File.GetLastWriteTimeUtc(SettingsPath),
+                UpdatedAt = File.GetLastWriteTimeUtc(_settingsPath),
                 TemperatureUnit = DefaultUnit(),
                 LocationLookupDone = false,
                 Clocks = root.Deserialize<List<ClockConfig>>(JsonOptions) ?? [],

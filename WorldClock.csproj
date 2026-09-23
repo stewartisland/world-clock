@@ -11,6 +11,16 @@
     <!-- Major.Minor. Bump with scripts/bump-version.ps1, not by hand, so CHANGELOG.md stays in step. -->
     <Version>1.2</Version>
     <Copyright>Copyright (c) 2026 Brendon. MIT License.</Copyright>
+    <!-- The Windows sign-in broker (msalruntime.dll) is native; bundle it into the single-file exe. -->
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <!-- The test project lives under tests/ and builds separately. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);tests/**</DefaultItemExcludes>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.90.0" />
+    <PackageReference Include="Microsoft.Identity.Client.Broker" Version="4.90.0" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.90.0" />
+  </ItemGroup>
 
 </Project>
