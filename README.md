@@ -7,15 +7,14 @@ It opens with six clocks: New Zealand, Croatia, UK, New York, Dallas and Seattle
 ## Features
 
 - A card for each clock showing the time, current temperature, a weather icon, the place the weather is for, the day and date, the UTC offset, and how many hours it is from your own time
-- **°C / °F** switch for all clocks. It starts in the unit for your Windows region
-- **Light and dark themes** (☀ / ☾ in the header). It starts with your Windows light/dark setting
+- A tidy header with **+ Add clock** and a **⋯** menu for everything else: °C / °F, Light / Dark / Use Windows setting, Always on top, and About
 - **+ Add clock**: type a city name and the time zone is chosen for you. There's also a manual time zone list for places the search can't find
 - Right-click a card to **Rename…**, **Set location…** (which place the weather is for), move it or remove it
 - Drag cards to reorder them
 - Daylight saving is handled automatically using Windows' own time zone data
 - Cards rearrange into columns as you resize the window
-- **Always on top** keeps the window above other windows
-- **ⓘ About** shows the version and links to the blog, the source code and Open-Meteo
+- Units start from your Windows region and the theme follows Windows (including live changes) until you pick your own. All choices are remembered
+- **About** shows the version and links to the blog, the source code and Open-Meteo
 
 ## Requirements
 

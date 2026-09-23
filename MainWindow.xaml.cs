@@ -36,7 +36,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         _settings = _settingsService.Load();
-        ThemeManager.Apply(_settings.Theme ?? ThemeManager.SystemTheme());
+        ThemeManager.SetPreference(_settings.Theme);
         ThemeManager.Attach(this);
 
         InitializeComponent();
@@ -46,6 +46,7 @@ public partial class MainWindow : Window
                 _clocks.Add(clock);
         }
 
+        Topmost = _settings.AlwaysOnTop;
         Clocks.ItemsSource = _clocks;
         _clocks.CollectionChanged += (_, _) => { SaveConfig(); Refresh(); };
 
@@ -62,8 +63,6 @@ public partial class MainWindow : Window
             await RefreshWeatherAsync();
         };
 
-        ShowUnit();
-        ShowTheme();
         Refresh();
     }
 
@@ -139,7 +138,26 @@ public partial class MainWindow : Window
         SaveConfig();
     }
 
-    // Header
+    // Header: + Add clock and the ⋯ menu
+
+    private void More_Click(object sender, RoutedEventArgs e)
+    {
+        MoreMenu.PlacementTarget = MoreButton;
+        // Right-align the menu under the button so it opens into the window, not off its edge.
+        MoreMenu.CustomPopupPlacementCallback = (popup, target, _) =>
+            [new CustomPopupPlacement(new Point(target.Width - popup.Width, target.Height + 4), PopupPrimaryAxis.Horizontal)];
+        MoreMenu.IsOpen = true;
+    }
+
+    private void MoreMenu_Opened(object sender, RoutedEventArgs e)
+    {
+        CelsiusItem.IsChecked = _settings.TemperatureUnit == TemperatureUnit.Celsius;
+        FahrenheitItem.IsChecked = _settings.TemperatureUnit == TemperatureUnit.Fahrenheit;
+        LightItem.IsChecked = _settings.Theme == AppTheme.Light;
+        DarkItem.IsChecked = _settings.Theme == AppTheme.Dark;
+        SystemThemeItem.IsChecked = _settings.Theme is null;
+        TopmostItem.IsChecked = Topmost;
+    }
 
     private void Celsius_Click(object sender, RoutedEventArgs e) => SetUnit(TemperatureUnit.Celsius);
 
@@ -149,39 +167,27 @@ public partial class MainWindow : Window
     {
         _settings.TemperatureUnit = unit;
         SaveConfig();
-        ShowUnit();
         Refresh();
     }
 
-    private void ShowUnit()
-    {
-        var celsius = _settings.TemperatureUnit == TemperatureUnit.Celsius;
-        StyleUnitButton(CelsiusButton, active: celsius);
-        StyleUnitButton(FahrenheitButton, active: !celsius);
-    }
+    private void Light_Click(object sender, RoutedEventArgs e) => SetTheme(AppTheme.Light);
 
-    private static void StyleUnitButton(Button button, bool active)
-    {
-        if (active)
-            button.SetResourceReference(BackgroundProperty, "UnitActiveBrush");
-        else
-            button.Background = Brushes.Transparent;
-        button.SetResourceReference(ForegroundProperty, active ? "TextPrimaryBrush" : "TextMutedBrush");
-    }
+    private void Dark_Click(object sender, RoutedEventArgs e) => SetTheme(AppTheme.Dark);
 
-    private void Theme_Click(object sender, RoutedEventArgs e)
+    private void SystemTheme_Click(object sender, RoutedEventArgs e) => SetTheme(null);
+
+    private void SetTheme(AppTheme? theme)
     {
-        _settings.Theme = ThemeManager.Current == AppTheme.Dark ? AppTheme.Light : AppTheme.Dark;
-        ThemeManager.Apply(_settings.Theme.Value);
+        _settings.Theme = theme;
+        ThemeManager.SetPreference(theme);
         SaveConfig();
-        ShowTheme();
     }
 
-    private void ShowTheme()
+    private void Topmost_Click(object sender, RoutedEventArgs e)
     {
-        var dark = ThemeManager.Current == AppTheme.Dark;
-        ThemeButton.Content = dark ? "☀" : "☾";
-        ThemeButton.ToolTip = dark ? "Switch to light mode" : "Switch to dark mode";
+        Topmost = !Topmost;
+        _settings.AlwaysOnTop = Topmost;
+        SaveConfig();
     }
 
     private async void AddClock_Click(object sender, RoutedEventArgs e)
@@ -195,9 +201,6 @@ public partial class MainWindow : Window
     }
 
     private void About_Click(object sender, RoutedEventArgs e) => new AboutWindow { Owner = this }.ShowDialog();
-
-    private void TopmostToggle_Changed(object sender, RoutedEventArgs e) =>
-        Topmost = TopmostToggle.IsChecked == true;
 
     private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
     {

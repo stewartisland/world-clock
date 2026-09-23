@@ -22,8 +22,10 @@ public sealed class AppSettings
     [JsonPropertyName("deviceName")] public string? DeviceName { get; set; }
     [JsonPropertyName("temperatureUnit")] public TemperatureUnit TemperatureUnit { get; set; }
 
-    /// <summary>Null until the user picks one; the Windows app theme is used until then.</summary>
+    /// <summary>Light or Dark; null (the default) follows the Windows app mode.</summary>
     [JsonPropertyName("theme")] public AppTheme? Theme { get; set; }
+
+    [JsonPropertyName("alwaysOnTop")] public bool AlwaysOnTop { get; set; }
 
     /// <summary>False until existing clocks have had their one-off location lookup by label.</summary>
     [JsonPropertyName("locationLookupDone")] public bool LocationLookupDone { get; set; }

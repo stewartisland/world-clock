@@ -49,25 +49,28 @@
     <DockPanel Margin="16">
         <DockPanel DockPanel.Dock="Top" Margin="4,0,4,12">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                <Border CornerRadius="6" Background="{DynamicResource ButtonBackgroundBrush}" Margin="0,0,14,0" Padding="2">
-                    <StackPanel Orientation="Horizontal">
-                        <Button x:Name="CelsiusButton" Content="°C" Width="34" Padding="0,4"
-                                Style="{StaticResource FlatButton}" ToolTip="Show temperatures in Celsius"
-                                Click="Celsius_Click"/>
-                        <Button x:Name="FahrenheitButton" Content="°F" Width="34" Padding="0,4"
-                                Style="{StaticResource FlatButton}" ToolTip="Show temperatures in Fahrenheit"
-                                Click="Fahrenheit_Click"/>
-                    </StackPanel>
-                </Border>
-                <CheckBox x:Name="TopmostToggle" VerticalAlignment="Center" Margin="0,0,14,0"
-                          Foreground="{DynamicResource TextMutedBrush}" Content="Always on top"
-                          Checked="TopmostToggle_Changed" Unchecked="TopmostToggle_Changed"/>
                 <Button Content="+ Add clock" Padding="12,6" Style="{StaticResource FlatButton}"
                         Click="AddClock_Click"/>
-                <Button x:Name="ThemeButton" Width="30" Height="30" Margin="8,0,0,0" FontSize="15"
-                        Style="{StaticResource FlatButton}" Click="Theme_Click"/>
-                <Button Content="ⓘ" Width="30" Height="30" Margin="8,0,0,0" FontSize="15"
-                        Style="{StaticResource FlatButton}" ToolTip="About World Clock" Click="About_Click"/>
+                <Button x:Name="MoreButton" Content="⋯" Width="32" Height="30" Margin="8,0,0,0" FontSize="16"
+                        Style="{StaticResource FlatButton}" ToolTip="More options"
+                        AutomationProperties.Name="More options" Click="More_Click">
+                    <Button.ContextMenu>
+                        <ContextMenu x:Name="MoreMenu" Placement="Custom" Opened="MoreMenu_Opened">
+                            <MenuItem Header="Temperature" IsEnabled="False"/>
+                            <MenuItem x:Name="CelsiusItem" Header="Celsius (°C)" Click="Celsius_Click"/>
+                            <MenuItem x:Name="FahrenheitItem" Header="Fahrenheit (°F)" Click="Fahrenheit_Click"/>
+                            <Separator/>
+                            <MenuItem Header="Theme" IsEnabled="False"/>
+                            <MenuItem x:Name="LightItem" Header="Light" Click="Light_Click"/>
+                            <MenuItem x:Name="DarkItem" Header="Dark" Click="Dark_Click"/>
+                            <MenuItem x:Name="SystemThemeItem" Header="Use Windows setting" Click="SystemTheme_Click"/>
+                            <Separator/>
+                            <MenuItem x:Name="TopmostItem" Header="Always on top" Click="Topmost_Click"/>
+                            <Separator/>
+                            <MenuItem Header="About World Clock" Click="About_Click"/>
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                </Button>
             </StackPanel>
             <StackPanel>
                 <TextBlock Text="World Clock" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="20" FontWeight="SemiBold"/>

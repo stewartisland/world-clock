@@ -9,7 +9,7 @@ Each card shows:
 | Label | **New York** | The name you gave the clock |
 | Weather icon | ☀️ ⛅ ☁️ 🌫️ 🌧️ ❄️ ⛈️ 🌙 | Current conditions there. A clear night shows 🌙 |
 | Time | 11:55 PM | Current local time there |
-| Temperature | 66° | Current temperature, in the unit chosen in the header |
+| Temperature | 66° | Current temperature, in the unit chosen in the ⋯ menu |
 | Place | New York, United States | The place the weather is for |
 | Date | Monday, 21 Sep | Local day and date. Check this for places that are already in tomorrow or still in yesterday |
 | Offset | UTC-4 · -16h from you | Its offset from UTC, and how far ahead (+) or behind (-) your computer's time zone it is |
@@ -27,13 +27,16 @@ Times update automatically, including when daylight saving starts or ends in eit
 
 The clocks keep working without an internet connection.
 
-## °C or °F
+## The ⋯ menu
 
-Use the **°C | °F** switch in the header. It applies to every clock and is remembered. The first time you run the app, it picks the unit for your Windows region (Settings → Time & language → Language & region → Country or region).
+Everything apart from adding a clock is in the **⋯** menu in the top-right corner. A ✓ shows the current choice. All choices are remembered.
 
-## Light or dark theme
-
-Click **☀** (in dark mode) or **☾** (in light mode) in the header to switch themes. Your choice is remembered. Until you pick one, the app follows your Windows setting (Settings → Personalization → Colors → Choose your app mode) each time it starts.
+| Section | Choices |
+| --- | --- |
+| Temperature | **Celsius (°C)** or **Fahrenheit (°F)**, for every clock. The first time you run the app, it picks the unit for your Windows region (Settings → Time & language → Language & region → Country or region) |
+| Theme | **Light**, **Dark**, or **Use Windows setting** (the default). With Use Windows setting, the app follows Settings → Personalization → Colors → Choose your app mode, and switches straight away if you change it |
+| Always on top | Keeps the window above other windows, which is handy as a small floating clock |
+| About World Clock | The app version, and links to the [World Clock blog post](https://www.brendonford.com/world-clock), the [source code on GitHub](https://github.com/stewartisland/world-clock) and [Open-Meteo](https://open-meteo.com/), which provides the weather data |
 
 ## Adding a clock
 
@@ -72,21 +75,13 @@ Cards are ordered left to right, then top to bottom.
 
 Nothing asks you to confirm. To get a clock back, add it again.
 
-## Always on top
-
-Tick **Always on top** to keep the window above other windows, which is handy as a small floating clock. This setting isn't saved and resets each time you open the app.
-
-## About
-
-Click **ⓘ** in the top-right corner to see the app version and links to the [World Clock blog post](https://www.brendonford.com/world-clock), the [source code on GitHub](https://github.com/stewartisland/world-clock) and [Open-Meteo](https://open-meteo.com/), which provides the weather data.
-
 ## Window size
 
 Cards arrange themselves into as many columns as fit, one column for roughly every 250 pixels of width. A narrow window gives a single column, and a scrollbar appears if the clocks don't all fit.
 
 ## Where your clocks are saved
 
-Your clocks, their order and the °C/°F choice are saved automatically after every change to:
+Your clocks, their order and your ⋯ menu choices are saved automatically after every change to:
 
 ```
 %APPDATA%\WorldClock\clocks.json
@@ -130,6 +125,7 @@ The file is plain JSON:
 - `Lat`, `Lon` and `Place` are optional. Without them, the clock shows **Set location…**.
 - `temperatureUnit` is `Celsius` or `Fahrenheit`.
 - `theme` is `Dark` or `Light`. Leave it out to follow Windows.
+- `alwaysOnTop` is `true` or `false`.
 - The app also writes `updatedAt` and `deviceName`. You don't need to edit them.
 
 If the file can't be read at all, the app falls back to the defaults.
@@ -140,7 +136,7 @@ If the file can't be read at all, the app falls back to the defaults.
 | --- | --- |
 | The app won't start and asks for .NET | Install the [.NET 9 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/9.0) |
 | No temperatures, or they're all grey | Check your internet connection. Weather comes from open-meteo.com |
-| The app started in °F (or °C) and you wanted the other | Click the other unit in the header. It's remembered |
+| The app started in °F (or °C) and you wanted the other | Choose the other unit in the ⋯ menu. It's remembered |
 | The weather is for the wrong place | Right-click the card → **Set location…** |
 | City search says it can't reach place search | You're offline, or open-meteo.com is unavailable. Use **Choose time zone manually** |
 | A clock disappeared after editing `clocks.json` | Its `TimeZoneId` is misspelled or unknown. Check it against `tzutil /l` |

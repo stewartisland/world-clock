@@ -40,7 +40,7 @@ App.xaml ──opens──▶ MainWindow
 
 | Type | File | Responsibility |
 | --- | --- | --- |
-| `MainWindow` | `MainWindow.xaml.cs` | Owns the clock collection and timers. Handles header controls, card commands, drag-and-drop, weather refresh and the one-off location lookup |
+| `MainWindow` | `MainWindow.xaml.cs` | Owns the clock collection and timers. Handles the header and ⋯ menu, card commands, drag-and-drop, weather refresh and the one-off location lookup |
 | `CityClock` | `CityClock.cs` | View model for one card. Holds a `TimeZoneInfo`, an optional location and the last weather. Exposes `Time`, `Date`, `Offset`, `Icon`, `Temperature`, `Place`, `HasLocation`, `IsWeatherStale`, `IsDragging` |
 | `SettingsService` | `SettingsService.cs` | Reads and writes `clocks.json`, migrates the pre-v1 bare-array format, and holds `Defaults` |
 | `OpenMeteoClient` | `OpenMeteo.cs` | Open-Meteo forecast and geocoding APIs. `OpenMeteoClient.Shared` is used everywhere |
@@ -107,10 +107,14 @@ Standard WPF `DragDrop`, with handlers on each card's `Border` (`x:Name="Card"`)
 ### Themes
 
 - All colours are `SolidColorBrush` resources in `Themes/Dark.xaml` and `Themes/Light.xaml`, with the same keys in both (`WindowBackgroundBrush`, `CardBackgroundBrush`, `TextPrimaryBrush`, `TextMutedBrush`, `LinkBrush` and so on). XAML always uses `{DynamicResource …}`, and code uses `SetResourceReference`, never a literal colour, so a theme switch repaints everything.
-- `ThemeManager.Apply` replaces `Application.Resources.MergedDictionaries` with the chosen dictionary, and sets each open window's title bar to dark or light with `DwmSetWindowAttribute(DWMWA_USE_IMMERSIVE_DARK_MODE)`. That works on Windows 10 20H1 and later, and does nothing on older versions.
+- `ThemeManager.SetPreference(AppTheme?)` takes `Light`, `Dark`, or `null` for "Use Windows setting". It swaps `Application.Resources.MergedDictionaries` to the right dictionary, and sets each open window's title bar to dark or light with `DwmSetWindowAttribute(DWMWA_USE_IMMERSIVE_DARK_MODE)`. That works on Windows 10 20H1 and later, and does nothing on older versions.
+- With `null`, the theme comes from `ThemeManager.SystemTheme()`, which reads `AppsUseLightTheme` from `HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize`. `SystemEvents.UserPreferenceChanged` re-applies it live when the Windows setting changes.
 - Every window calls `ThemeManager.Attach(this)` in its constructor, so its title bar matches when it opens. **New windows must do the same.**
-- Startup theme: `settings.theme` if set, otherwise `ThemeManager.SystemTheme()`, which reads `AppsUseLightTheme` from `HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize`.
-- Standard controls that aren't restyled (dialog buttons, context menus, scrollbars, checkboxes) keep the Windows look in both themes.
+- Menus (`ContextMenu`, `MenuItem` and the menu separator) are restyled in `App.xaml` to use the theme colours. The template is flat: there are no submenus, checked items show a ✓, and disabled items are used as group labels (Temperature, Theme). Dialog buttons, scrollbars and the ListBox keep the standard Windows look.
+
+### Header and ⋯ menu
+
+The header has only **+ Add clock** and **⋯** (`MoreButton`). `More_Click` opens `MoreMenu` with a custom placement that right-aligns it under the button. `MoreMenu_Opened` sets the ✓ on the current unit, theme and Always on top state each time it opens, so there's no menu state to keep in sync. Unit, theme and Always on top are saved in `clocks.json` (`temperatureUnit`, `theme`, `alwaysOnTop`).
 
 ### Layout
 
@@ -138,7 +142,5 @@ Open-Meteo's free API is **non-commercial only** and needs credit under CC BY 4.
 
 ## Known limitations
 
-- **Always on top** isn't saved.
 - Emoji icons render in monochrome in WPF.
-- There's no "follow Windows" option once a theme has been picked. To go back to following Windows, remove `theme` from `clocks.json`.
 - No automated tests.

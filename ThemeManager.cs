@@ -14,7 +14,12 @@ public enum AppTheme { Dark, Light }
 public static class ThemeManager
 {
     private const int DwmwaUseImmersiveDarkMode = 20;
+    private static bool _listening;
 
+    /// <summary>The user's choice; null means follow the Windows app mode.</summary>
+    public static AppTheme? Preference { get; private set; }
+
+    /// <summary>The theme actually showing.</summary>
     public static AppTheme Current { get; private set; } = AppTheme.Dark;
 
     /// <summary>The Windows "app mode" setting (Settings → Personalization → Colors).</summary>
@@ -25,7 +30,26 @@ public static class ThemeManager
         return value is int light && light == 1 ? AppTheme.Light : AppTheme.Dark;
     }
 
-    public static void Apply(AppTheme theme)
+    /// <summary>Applies a chosen theme, or follows Windows (including live changes) when null.</summary>
+    public static void SetPreference(AppTheme? preference)
+    {
+        Preference = preference;
+        Apply(preference ?? SystemTheme());
+
+        if (!_listening)
+        {
+            _listening = true;
+            SystemEvents.UserPreferenceChanged += (_, e) =>
+            {
+                if (e.Category == UserPreferenceCategory.General && Preference is null)
+                    Application.Current?.Dispatcher.BeginInvoke(() => Apply(SystemTheme()));
+            };
+        }
+    }
+
+    public static void Attach(Window window) => window.SourceInitialized += (_, _) => SetTitleBar(window);
+
+    private static void Apply(AppTheme theme)
     {
         Current = theme;
         var dictionaries = Application.Current.Resources.MergedDictionaries;
@@ -35,8 +59,6 @@ public static class ThemeManager
         foreach (Window window in Application.Current.Windows)
             SetTitleBar(window);
     }
-
-    public static void Attach(Window window) => window.SourceInitialized += (_, _) => SetTitleBar(window);
 
     private static void SetTitleBar(Window window)
     {
