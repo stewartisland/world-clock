@@ -12,8 +12,7 @@ public partial class AboutWindow : Window
         InitializeComponent();
         ThemeManager.Attach(this);
         var assembly = Assembly.GetExecutingAssembly();
-        var version = assembly.GetName().Version;
-        VersionText.Text = $"Version {version?.ToString(3)}";
+        VersionText.Text = $"Version {AppInfo.Version}";
         CopyrightRun.Text = assembly.GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright?.Split(". ")[0] + ".";
     }
 

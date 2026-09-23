@@ -1,6 +1,14 @@
+using System.Reflection;
 using System.Text.Json.Serialization;
 
 namespace WorldClock;
+
+/// <summary>The app version (Major.Minor), from &lt;Version&gt; in WorldClock.csproj.</summary>
+public static class AppInfo
+{
+    public static string Version { get; } =
+        Assembly.GetExecutingAssembly().GetName().Version?.ToString(2) ?? "0.0";
+}
 
 /// <summary>One saved clock. Lat/Lon/Place are optional: clocks without them show "Set location…".</summary>
 public sealed record ClockConfig(

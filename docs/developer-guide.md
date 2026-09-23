@@ -69,7 +69,7 @@ Time zones are stored as **Windows IDs** (such as `"Eastern Standard Time"`). Ci
 - **Ageing:** weather older than 20 minutes shows greyed out (`IsWeatherStale`). Older than 2 hours, it's dropped and the card shows "–".
 - **Failures:** network, timeout and parse errors are caught and ignored. The card keeps its last value and ages it as above. There are never error dialogs.
 - **Icons:** `CityClock.WeatherIcon` maps WMO weather codes plus `is_day` to emoji. Without weather, the icon falls back to ☀️/🌙 from local time (6am–6pm counts as day).
-- **HTTP:** one shared `HttpClient` with a 10-second timeout and the User-Agent `WorldClock/1.0 (+https://github.com/stewartisland/world-clock)`.
+- **HTTP:** one shared `HttpClient` with a 10-second timeout and the User-Agent `WorldClock/<version> (+https://github.com/stewartisland/world-clock)`, using `AppInfo.Version`.
 
 ### Place search
 
@@ -120,6 +120,34 @@ The header has only **+ Add clock** and **⋯** (`MoreButton`). `More_Click` ope
 
 `ColumnCount` is a dependency property on `MainWindow`. It's recalculated on `SizeChanged` as `max(1, ActualWidth / 250)`, and the `UniformGrid` columns are bound to it.
 
+## Versioning
+
+The version is **Major.Minor** and lives in one place: `<Version>` in `WorldClock.csproj`. The app reads it from the built assembly (`AppInfo.Version`) for the ⋯ menu, the About window and the web requests' User-Agent, so nothing else needs editing.
+
+| Bump | When | Example |
+| --- | --- | --- |
+| **minor** | New features, improvements and fixes | 1.2 → 1.3 |
+| **major** | Big or breaking changes, such as a settings file that older versions can't read (`AppSettings.CurrentVersion` goes up) | 1.9 → 2.0 |
+
+**Every change you ship to `main` gets a bump.** Several commits that go out together can share one version. To release:
+
+```powershell
+# From a PowerShell prompt in the repo root
+./scripts/bump-version.ps1 minor -Notes "Added rain radar", "Fixed Dallas weather" -Commit
+git push --follow-tags
+
+# Or from cmd / Git Bash (separate notes with ;)
+powershell -File scripts/bump-version.ps1 minor -Notes "Added rain radar; Fixed Dallas weather" -Commit
+```
+
+The script:
+
+1. raises `<Version>` in `WorldClock.csproj`,
+2. adds a dated entry with your notes to the top of [CHANGELOG.md](../CHANGELOG.md),
+3. with `-Commit`, commits both files as "Release X.Y" and creates an annotated tag `vX.Y`.
+
+Without `-Commit`, it only edits the two files, so you can include them in your own commit. Then publish the exe as usual.
+
 ## Common changes
 
 | Change | Where |
@@ -132,7 +160,7 @@ The header has only **+ Add clock** and **⋯** (`MoreButton`). `More_Click` ope
 | Weather refresh interval | `_weatherTimer` in `MainWindow` |
 | Weather or place search provider | Implement `IWeatherService` / `IPlaceSearch` and change the `OpenMeteoClient.Shared` references in `MainWindow` and `AddClockWindow` |
 | Card width / column breakpoint | the `250` in the `SizeChanged` handler in the `MainWindow` constructor |
-| App version (shown in About) | `<Version>` in `WorldClock.csproj` |
+| App version | Run `scripts/bump-version.ps1` (see [Versioning](#versioning)). Don't edit `<Version>` by hand |
 | Colours | `Themes/Dark.xaml` and `Themes/Light.xaml`. Add any new key to both |
 | Fonts and sizes | Inline in each window's XAML |
 

@@ -28,7 +28,7 @@ public sealed class OpenMeteoClient : IWeatherService, IPlaceSearch
     private static HttpClient CreateHttpClient()
     {
         var http = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
-        http.DefaultRequestHeaders.UserAgent.ParseAdd("WorldClock/1.0 (+https://github.com/stewartisland/world-clock)");
+        http.DefaultRequestHeaders.UserAgent.ParseAdd($"WorldClock/{AppInfo.Version} (+https://github.com/stewartisland/world-clock)");
         return http;
     }
 

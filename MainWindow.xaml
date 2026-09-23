@@ -68,6 +68,7 @@
                             <MenuItem x:Name="TopmostItem" Header="Always on top" Click="Topmost_Click"/>
                             <Separator/>
                             <MenuItem Header="About World Clock" Click="About_Click"/>
+                            <MenuItem x:Name="VersionItem" IsEnabled="False"/>
                         </ContextMenu>
                     </Button.ContextMenu>
                 </Button>

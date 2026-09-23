@@ -157,6 +157,7 @@ public partial class MainWindow : Window
         DarkItem.IsChecked = _settings.Theme == AppTheme.Dark;
         SystemThemeItem.IsChecked = _settings.Theme is null;
         TopmostItem.IsChecked = Topmost;
+        VersionItem.Header = $"Version {AppInfo.Version}";
     }
 
     private void Celsius_Click(object sender, RoutedEventArgs e) => SetUnit(TemperatureUnit.Celsius);

@@ -8,7 +8,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>WorldClock</AssemblyName>
     <RootNamespace>WorldClock</RootNamespace>
-    <Version>1.1.0</Version>
+    <!-- Major.Minor. Bump with scripts/bump-version.ps1, not by hand, so CHANGELOG.md stays in step. -->
+    <Version>1.2</Version>
     <Copyright>Copyright (c) 2026 Brendon. MIT License.</Copyright>
   </PropertyGroup>
 

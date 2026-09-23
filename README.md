@@ -41,6 +41,7 @@ The app is written to `publish\WorldClock.exe`. Close any running copy before yo
 
 - [User guide](docs/user-guide.md): how to use the app, where settings are stored and how to reset them
 - [Developer guide](docs/developer-guide.md): project layout, how the app works and how to change it
+- [Changelog](CHANGELOG.md): what changed in each version
 - Feature definitions: [temperature](docs/features/temperature.md) (built), [sign in and sync](docs/features/cloud-sign-in.md) (planned)
 
 ## Project layout
@@ -57,7 +58,8 @@ The app is written to `publish\WorldClock.exe`. Close any running copy before yo
 | `SettingsService.cs` | Loads and saves `clocks.json`, including migrating older files. Holds the default clocks |
 | `OpenMeteo.cs` | Weather and place search from Open-Meteo, behind `IWeatherService` / `IPlaceSearch` |
 | `Models.cs` | `ClockConfig`, `AppSettings`, `PlaceResult`, `CurrentWeather` |
-| `WorldClock.csproj` | Project file (targets `net9.0-windows` with WPF) |
+| `WorldClock.csproj` | Project file (targets `net9.0-windows` with WPF). Holds the app version |
+| `scripts/bump-version.ps1` | Raises the version (major or minor) and updates `CHANGELOG.md` |
 
 ## License
 

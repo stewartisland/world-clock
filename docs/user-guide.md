@@ -36,6 +36,7 @@ Everything apart from adding a clock is in the **⋯** menu in the top-right cor
 | Temperature | **Celsius (°C)** or **Fahrenheit (°F)**, for every clock. The first time you run the app, it picks the unit for your Windows region (Settings → Time & language → Language & region → Country or region) |
 | Theme | **Light**, **Dark**, or **Use Windows setting** (the default). With Use Windows setting, the app follows Settings → Personalization → Colors → Choose your app mode, and switches straight away if you change it |
 | Always on top | Keeps the window above other windows, which is handy as a small floating clock |
+| Version | The version you're running, such as **Version 1.2**. See the [changelog](../CHANGELOG.md) for what changed in each version |
 | About World Clock | The app version, and links to the [World Clock blog post](https://www.brendonford.com/world-clock), the [source code on GitHub](https://github.com/stewartisland/world-clock) and [Open-Meteo](https://open-meteo.com/), which provides the weather data |
 
 ## Adding a clock
