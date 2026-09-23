@@ -32,7 +32,9 @@ App.xaml ──opens──▶ MainWindow
                      ├── DispatcherTimer 250 ms   ──▶ CityClock.Update(utcNow, unit)
                      ├── DispatcherTimer 15 min   ──▶ IWeatherService.GetCurrentAsync ──▶ CityClock.SetWeather
                      ├── AddClockWindow  ──▶ IPlaceSearch.SearchAsync   (returns ClockConfig or PlaceResult)
-                     └── RenameWindow
+                     ├── RenameWindow
+                     ├── AboutWindow
+                     └── ThemeManager ──swaps──▶ Themes/Dark.xaml | Themes/Light.xaml
                                         OpenMeteoClient implements IWeatherService + IPlaceSearch
 ```
 
@@ -44,6 +46,7 @@ App.xaml ──opens──▶ MainWindow
 | `OpenMeteoClient` | `OpenMeteo.cs` | Open-Meteo forecast and geocoding APIs. `OpenMeteoClient.Shared` is used everywhere |
 | `AddClockWindow` | `AddClockWindow.xaml.cs` | Add mode: city search (or manual time zone list), returns `ResultClock`. Set-location mode (`new AddClockWindow(setLocationFor: label)`): returns `ResultPlace` |
 | `RenameWindow` | `RenameWindow.xaml.cs` | Text prompt, returns `NewName` |
+| `AboutWindow` | `AboutWindow.xaml.cs` | Version (from the assembly), links to the blog and GitHub, Open-Meteo credit, licence |
 | `ClockConfig`, `AppSettings`, `PlaceResult`, `CurrentWeather` | `Models.cs` | Data shapes |
 
 ### Time calculation
@@ -101,6 +104,14 @@ Standard WPF `DragDrop`, with handlers on each card's `Border` (`x:Name="Card"`)
 3. `DragOver` on any other card calls `_clocks.Move(from, to)`, so the grid reorders live. After the move, the card under the pointer is the dragged one, so the order doesn't flicker back and forth.
 4. When the drag finishes, `IsDragging` is cleared and the settings are saved.
 
+### Themes
+
+- All colours are `SolidColorBrush` resources in `Themes/Dark.xaml` and `Themes/Light.xaml`, with the same keys in both (`WindowBackgroundBrush`, `CardBackgroundBrush`, `TextPrimaryBrush`, `TextMutedBrush`, `LinkBrush` and so on). XAML always uses `{DynamicResource …}`, and code uses `SetResourceReference`, never a literal colour, so a theme switch repaints everything.
+- `ThemeManager.Apply` replaces `Application.Resources.MergedDictionaries` with the chosen dictionary, and sets each open window's title bar to dark or light with `DwmSetWindowAttribute(DWMWA_USE_IMMERSIVE_DARK_MODE)`. That works on Windows 10 20H1 and later, and does nothing on older versions.
+- Every window calls `ThemeManager.Attach(this)` in its constructor, so its title bar matches when it opens. **New windows must do the same.**
+- Startup theme: `settings.theme` if set, otherwise `ThemeManager.SystemTheme()`, which reads `AppsUseLightTheme` from `HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize`.
+- Standard controls that aren't restyled (dialog buttons, context menus, scrollbars, checkboxes) keep the Windows look in both themes.
+
 ### Layout
 
 `ColumnCount` is a dependency property on `MainWindow`. It's recalculated on `SizeChanged` as `max(1, ActualWidth / 250)`, and the `UniformGrid` columns are bound to it.
@@ -117,14 +128,17 @@ Standard WPF `DragDrop`, with handlers on each card's `Border` (`x:Name="Card"`)
 | Weather refresh interval | `_weatherTimer` in `MainWindow` |
 | Weather or place search provider | Implement `IWeatherService` / `IPlaceSearch` and change the `OpenMeteoClient.Shared` references in `MainWindow` and `AddClockWindow` |
 | Card width / column breakpoint | the `250` in the `SizeChanged` handler in the `MainWindow` constructor |
-| Colours and fonts | `MainWindow.xaml`, `AddClockWindow.xaml` and `RenameWindow.xaml` (hex values inline; the main palette is `#15171C` background, `#1F232B` cards, `#2C313B` borders, `#8A909C` muted text) |
+| App version (shown in About) | `<Version>` in `WorldClock.csproj` |
+| Colours | `Themes/Dark.xaml` and `Themes/Light.xaml`. Add any new key to both |
+| Fonts and sizes | Inline in each window's XAML |
 
 ## Licensing of weather data
 
-Open-Meteo's free API is **non-commercial only** and needs credit under CC BY 4.0. The credit is the "Weather: Open-Meteo.com" link at the bottom of the main window, so keep it if you change the layout. See the [temperature feature definition](features/temperature.md#decisions) for why this provider was chosen and what switching would involve.
+Open-Meteo's free API is **non-commercial only** and needs credit under CC BY 4.0. The credit is the "Weather: Open-Meteo.com" link at the bottom of the main window plus the Weather data section of the About window (`AboutWindow.xaml`). Keep both if you change the layout. See the [temperature feature definition](features/temperature.md#decisions) for why this provider was chosen and what switching would involve.
 
 ## Known limitations
 
 - **Always on top** isn't saved.
 - Emoji icons render in monochrome in WPF.
+- There's no "follow Windows" option once a theme has been picked. To go back to following Windows, remove `theme` from `clocks.json`.
 - No automated tests.

@@ -34,6 +34,7 @@ public partial class AddClockWindow : Window
     public AddClockWindow(string? setLocationFor = null)
     {
         InitializeComponent();
+        ThemeManager.Attach(this);
         _debounce.Tick += async (_, _) => { _debounce.Stop(); await RunPlaceSearchAsync(); };
 
         if (setLocationFor is not null)

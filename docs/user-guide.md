@@ -31,6 +31,10 @@ The clocks keep working without an internet connection.
 
 Use the **°C | °F** switch in the header. It applies to every clock and is remembered. The first time you run the app, it picks the unit for your Windows region (Settings → Time & language → Language & region → Country or region).
 
+## Light or dark theme
+
+Click **☀** (in dark mode) or **☾** (in light mode) in the header to switch themes. Your choice is remembered. Until you pick one, the app follows your Windows setting (Settings → Personalization → Colors → Choose your app mode) each time it starts.
+
 ## Adding a clock
 
 1. Click **+ Add clock** in the top-right corner.
@@ -71,6 +75,10 @@ Nothing asks you to confirm. To get a clock back, add it again.
 ## Always on top
 
 Tick **Always on top** to keep the window above other windows, which is handy as a small floating clock. This setting isn't saved and resets each time you open the app.
+
+## About
+
+Click **ⓘ** in the top-right corner to see the app version and links to the [World Clock blog post](https://www.brendonford.com/world-clock), the [source code on GitHub](https://github.com/stewartisland/world-clock) and [Open-Meteo](https://open-meteo.com/), which provides the weather data.
 
 ## Window size
 
@@ -121,6 +129,7 @@ The file is plain JSON:
 - `TimeZoneId` must be a Windows time zone ID. To list them all, run `tzutil /l` in a terminal: the IDs are the lines that don't start with `(UTC`. Any clock with an ID the app doesn't recognise is skipped.
 - `Lat`, `Lon` and `Place` are optional. Without them, the clock shows **Set location…**.
 - `temperatureUnit` is `Celsius` or `Fahrenheit`.
+- `theme` is `Dark` or `Light`. Leave it out to follow Windows.
 - The app also writes `updatedAt` and `deviceName`. You don't need to edit them.
 
 If the file can't be read at all, the app falls back to the defaults.

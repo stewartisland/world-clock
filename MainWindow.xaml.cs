@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -22,9 +23,6 @@ public partial class MainWindow : Window
         set => SetValue(ColumnCountProperty, value);
     }
 
-    private static readonly Brush ActiveUnitBrush = new SolidColorBrush(Color.FromRgb(0x4A, 0x52, 0x60));
-    private static readonly Brush MutedBrush = new SolidColorBrush(Color.FromRgb(0x8A, 0x90, 0x9C));
-
     private readonly SettingsService _settingsService = new();
     private readonly AppSettings _settings;
     private readonly IWeatherService _weather = OpenMeteoClient.Shared;
@@ -37,9 +35,11 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
-        InitializeComponent();
-
         _settings = _settingsService.Load();
+        ThemeManager.Apply(_settings.Theme ?? ThemeManager.SystemTheme());
+        ThemeManager.Attach(this);
+
+        InitializeComponent();
         foreach (var config in _settings.Clocks)
         {
             if (CityClock.TryCreate(config, out var clock))
@@ -63,6 +63,7 @@ public partial class MainWindow : Window
         };
 
         ShowUnit();
+        ShowTheme();
         Refresh();
     }
 
@@ -155,10 +156,32 @@ public partial class MainWindow : Window
     private void ShowUnit()
     {
         var celsius = _settings.TemperatureUnit == TemperatureUnit.Celsius;
-        CelsiusButton.Background = celsius ? ActiveUnitBrush : Brushes.Transparent;
-        FahrenheitButton.Background = celsius ? Brushes.Transparent : ActiveUnitBrush;
-        CelsiusButton.Foreground = celsius ? Brushes.White : MutedBrush;
-        FahrenheitButton.Foreground = celsius ? MutedBrush : Brushes.White;
+        StyleUnitButton(CelsiusButton, active: celsius);
+        StyleUnitButton(FahrenheitButton, active: !celsius);
+    }
+
+    private static void StyleUnitButton(Button button, bool active)
+    {
+        if (active)
+            button.SetResourceReference(BackgroundProperty, "UnitActiveBrush");
+        else
+            button.Background = Brushes.Transparent;
+        button.SetResourceReference(ForegroundProperty, active ? "TextPrimaryBrush" : "TextMutedBrush");
+    }
+
+    private void Theme_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.Theme = ThemeManager.Current == AppTheme.Dark ? AppTheme.Light : AppTheme.Dark;
+        ThemeManager.Apply(_settings.Theme.Value);
+        SaveConfig();
+        ShowTheme();
+    }
+
+    private void ShowTheme()
+    {
+        var dark = ThemeManager.Current == AppTheme.Dark;
+        ThemeButton.Content = dark ? "☀" : "☾";
+        ThemeButton.ToolTip = dark ? "Switch to light mode" : "Switch to dark mode";
     }
 
     private async void AddClock_Click(object sender, RoutedEventArgs e)
@@ -170,6 +193,8 @@ public partial class MainWindow : Window
             await RefreshWeatherAsync();
         }
     }
+
+    private void About_Click(object sender, RoutedEventArgs e) => new AboutWindow { Owner = this }.ShowDialog();
 
     private void TopmostToggle_Changed(object sender, RoutedEventArgs e) =>
         Topmost = TopmostToggle.IsChecked == true;

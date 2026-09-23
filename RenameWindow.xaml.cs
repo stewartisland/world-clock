@@ -10,6 +10,7 @@ public partial class RenameWindow : Window
     public RenameWindow(string current)
     {
         InitializeComponent();
+        ThemeManager.Attach(this);
         NameBox.Text = current;
         NameBox.SelectAll();
     }

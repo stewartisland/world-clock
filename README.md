@@ -8,12 +8,14 @@ It opens with six clocks: New Zealand, Croatia, UK, New York, Dallas and Seattle
 
 - A card for each clock showing the time, current temperature, a weather icon, the place the weather is for, the day and date, the UTC offset, and how many hours it is from your own time
 - **°C / °F** switch for all clocks. It starts in the unit for your Windows region
+- **Light and dark themes** (☀ / ☾ in the header). It starts with your Windows light/dark setting
 - **+ Add clock**: type a city name and the time zone is chosen for you. There's also a manual time zone list for places the search can't find
 - Right-click a card to **Rename…**, **Set location…** (which place the weather is for), move it or remove it
 - Drag cards to reorder them
 - Daylight saving is handled automatically using Windows' own time zone data
 - Cards rearrange into columns as you resize the window
 - **Always on top** keeps the window above other windows
+- **ⓘ About** shows the version and links to the blog, the source code and Open-Meteo
 
 ## Requirements
 
@@ -51,6 +53,8 @@ The app is written to `publish\WorldClock.exe`. Close any running copy before yo
 | `CityClock.cs` | View model for one card: time, temperature, weather icon |
 | `AddClockWindow.xaml` / `.cs` | The "Add clock" dialog (city search or manual time zone). Also used for "Set location…" |
 | `RenameWindow.xaml` / `.cs` | The "Rename clock" dialog |
+| `AboutWindow.xaml` / `.cs` | The About window: version, links, Open-Meteo credit, licence |
+| `ThemeManager.cs`, `Themes/Dark.xaml`, `Themes/Light.xaml` | Light/dark themes: colour palettes, swapping them at runtime, and matching the title bar |
 | `SettingsService.cs` | Loads and saves `clocks.json`, including migrating older files. Holds the default clocks |
 | `OpenMeteo.cs` | Weather and place search from Open-Meteo, behind `IWeatherService` / `IPlaceSearch` |
 | `Models.cs` | `ClockConfig`, `AppSettings`, `PlaceResult`, `CurrentWeather` |

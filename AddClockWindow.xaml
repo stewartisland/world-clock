@@ -3,23 +3,23 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Add clock" Width="460" Height="540" ResizeMode="CanResizeWithGrip"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
-        Background="#1F232B" FocusManager.FocusedElement="{Binding ElementName=Search}">
+        Background="{DynamicResource CardBackgroundBrush}" FocusManager.FocusedElement="{Binding ElementName=Search}">
 
     <Window.Resources>
         <Style TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#8A909C"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
             <Setter Property="Margin" Value="0,0,0,4"/>
         </Style>
         <Style TargetType="TextBox">
-            <Setter Property="Background" Value="#15171C"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CaretBrush" Value="White"/>
-            <Setter Property="BorderBrush" Value="#2C313B"/>
+            <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}"/>
             <Setter Property="Padding" Value="6,5"/>
             <Setter Property="FontSize" Value="14"/>
         </Style>
         <Style TargetType="Hyperlink">
-            <Setter Property="Foreground" Value="#7FA7F5"/>
+            <Setter Property="Foreground" Value="{DynamicResource LinkBrush}"/>
         </Style>
     </Window.Resources>
 
@@ -49,7 +49,7 @@
         </StackPanel>
 
         <ListBox x:Name="Results" Margin="0,6,0,0" DisplayMemberPath="DisplayName"
-                 Background="#15171C" Foreground="#E4E7EC" BorderBrush="#2C313B"
+                 Background="{DynamicResource InputBackgroundBrush}" Foreground="{DynamicResource TextSecondaryBrush}" BorderBrush="{DynamicResource CardBorderBrush}"
                  SelectionChanged="Results_SelectionChanged" MouseDoubleClick="Results_MouseDoubleClick"/>
     </DockPanel>
 </Window>
