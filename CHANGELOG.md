@@ -7,6 +7,11 @@ World Clock uses **Major.Minor** version numbers:
 
 To release a new version, run `scripts/bump-version.ps1` (see the [developer guide](docs/developer-guide.md#versioning)).
 
+## 1.3 (2026-09-23)
+
+- New iPhone app with the same clocks, weather, city search, themes and °C / °F as the Windows app
+- Version numbers are now shared by the Windows and iPhone apps
+
 ## 1.2 (2026-09-23)
 
 - Simpler header: **+ Add clock** and a **⋯** menu holding temperature unit, theme, Always on top and About
