@@ -2,6 +2,8 @@
 
 A small Windows desktop app that shows the current time and weather in several cities at once. It's built with WPF on .NET 9.
 
+There's also a native **iPhone app** in [`ios/`](ios), built with SwiftUI, which does the same things laid out for a phone, apart from sync and Always on top. See the [iPhone app guide](docs/ios-guide.md).
+
 It opens with six clocks: New Zealand, Croatia, UK, New York, Dallas and Seattle. You can add, remove, rename and reorder clocks, and your layout is kept between launches.
 
 **[About this project](docs/about.md)** explains why it exists, how it was built, and the reasoning behind its design decisions.
@@ -9,7 +11,7 @@ It opens with six clocks: New Zealand, Croatia, UK, New York, Dallas and Seattle
 ## Features
 
 - A card for each clock showing the time, current temperature, a weather icon, the place the weather is for, the day and date, the UTC offset, and how many hours it is from your own time
-- **Sync with your Microsoft account:** the same clocks on every PC, saved to a private folder in your own OneDrive. There's no World Clock server
+- **Sync with your Microsoft account** (Windows): the same clocks on every PC, saved to a private folder in your own OneDrive. There's no World Clock server
 - A tidy header with **+ Add clock** and a **⋯** menu for everything else: sync, °C / °F, Light / Dark / Use Windows setting, Always on top, and About
 - **+ Add clock**: type a city name and the time zone is chosen for you. There's also a manual time zone list for places the search can't find
 - Right-click a card to **Rename…**, **Set location…** (which place the weather is for), move it or remove it
@@ -46,6 +48,7 @@ The app is written to `publish\WorldClock.exe`. Close any running copy before yo
 - [About this project](docs/about.md): why it exists, how it was built, and the design decisions
 - [User guide](docs/user-guide.md): how to use the app, where settings are stored and how to reset them
 - [Developer guide](docs/developer-guide.md): project layout, how the app works and how to change it
+- [iPhone app guide](docs/ios-guide.md): using, building and changing the iPhone app
 - [Changelog](CHANGELOG.md): what changed in each version
 - Feature definitions: [temperature](docs/features/temperature.md) (built), [sign in and sync](docs/features/cloud-sign-in.md) (Microsoft built, Google planned)
 
@@ -66,7 +69,9 @@ The app is written to `publish\WorldClock.exe`. Close any running copy before yo
 | `Sync/`, `MainWindow.Sync.cs` | Microsoft sign-in (MSAL) and OneDrive sync, the first-sign-in choice dialog, and the ⋯ menu's Sync section |
 | `tests/WorldClock.Tests` | xUnit tests for settings and sync logic (`dotnet test tests/WorldClock.Tests/WorldClock.Tests.csproj`) |
 | `WorldClock.csproj` | Project file (targets `net9.0-windows` with WPF). Holds the app version |
-| `scripts/bump-version.ps1` | Raises the version (major or minor) and updates `CHANGELOG.md` |
+| `scripts/make-app-icon.swift` | Draws the iPhone app icon (light, dark and tinted) |
+| `scripts/bump-version.ps1` | Raises the version (major or minor) of both apps and updates `CHANGELOG.md` |
+| `ios/` | The iPhone app (SwiftUI, Xcode project `ios/WorldClock.xcodeproj`). See the [iPhone app guide](docs/ios-guide.md) |
 
 ## License
 

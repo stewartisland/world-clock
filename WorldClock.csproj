@@ -9,12 +9,12 @@
     <AssemblyName>WorldClock</AssemblyName>
     <RootNamespace>WorldClock</RootNamespace>
     <!-- Major.Minor. Bump with scripts/bump-version.ps1, not by hand, so CHANGELOG.md stays in step. -->
-    <Version>1.2</Version>
+    <Version>1.4</Version>
     <Copyright>Copyright (c) 2026 Brendon. MIT License.</Copyright>
     <!-- The Windows sign-in broker (msalruntime.dll) is native; bundle it into the single-file exe. -->
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-    <!-- The test project lives under tests/ and builds separately. -->
-    <DefaultItemExcludes>$(DefaultItemExcludes);tests/**</DefaultItemExcludes>
+    <!-- The test project (tests/) and the iPhone app (ios/) build separately. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);tests/**;ios/**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>

@@ -169,7 +169,7 @@ Sign-in needs an app registration. Its client ID is public (it's not a secret) a
 
 ## Versioning
 
-The version is **Major.Minor** and lives in one place: `<Version>` in `WorldClock.csproj`. The app reads it from the built assembly (`AppInfo.Version`) for the ⋯ menu, the About window and the web requests' User-Agent, so nothing else needs editing.
+The version is **Major.Minor** and lives in `<Version>` in `WorldClock.csproj`. The iPhone app has the same version in `MARKETING_VERSION`, and the script keeps them in step (see the [iPhone app guide](ios-guide.md#versioning)). The app reads it from the built assembly (`AppInfo.Version`) for the ⋯ menu, the About window and the web requests' User-Agent, so nothing else needs editing.
 
 | Bump | When | Example |
 | --- | --- | --- |
@@ -189,9 +189,9 @@ powershell -File scripts/bump-version.ps1 minor -Notes "Added rain radar; Fixed 
 
 The script:
 
-1. raises `<Version>` in `WorldClock.csproj`,
+1. raises `<Version>` in `WorldClock.csproj` and `MARKETING_VERSION` in `ios/WorldClock.xcodeproj/project.pbxproj`,
 2. adds a dated entry with your notes to the top of [CHANGELOG.md](../CHANGELOG.md),
-3. with `-Commit`, commits both files as "Release X.Y" and creates an annotated tag `vX.Y`.
+3. with `-Commit`, commits those files as "Release X.Y" and creates an annotated tag `vX.Y`.
 
 Without `-Commit`, it only edits the two files, so you can include them in your own commit. Then publish the exe as usual.
 
