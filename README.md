@@ -2,6 +2,8 @@
 
 A small Windows desktop app that shows the current time and weather in several cities at once. It's built with WPF on .NET 9.
 
+There's also a native **iPhone app** in [`ios/`](ios), built with SwiftUI, which does the same things laid out for a phone. See the [iPhone app guide](docs/ios-guide.md).
+
 It opens with six clocks: New Zealand, Croatia, UK, New York, Dallas and Seattle. You can add, remove, rename and reorder clocks, and your layout is kept between launches.
 
 ## Features
@@ -41,6 +43,7 @@ The app is written to `publish\WorldClock.exe`. Close any running copy before yo
 
 - [User guide](docs/user-guide.md): how to use the app, where settings are stored and how to reset them
 - [Developer guide](docs/developer-guide.md): project layout, how the app works and how to change it
+- [iPhone app guide](docs/ios-guide.md): using, building and changing the iPhone app
 - [Changelog](CHANGELOG.md): what changed in each version
 - Feature definitions: [temperature](docs/features/temperature.md) (built), [sign in and sync](docs/features/cloud-sign-in.md) (planned)
 
@@ -59,7 +62,8 @@ The app is written to `publish\WorldClock.exe`. Close any running copy before yo
 | `OpenMeteo.cs` | Weather and place search from Open-Meteo, behind `IWeatherService` / `IPlaceSearch` |
 | `Models.cs` | `ClockConfig`, `AppSettings`, `PlaceResult`, `CurrentWeather` |
 | `WorldClock.csproj` | Project file (targets `net9.0-windows` with WPF). Holds the app version |
-| `scripts/bump-version.ps1` | Raises the version (major or minor) and updates `CHANGELOG.md` |
+| `scripts/bump-version.ps1` | Raises the version (major or minor) of both apps and updates `CHANGELOG.md` |
+| `ios/` | The iPhone app (SwiftUI, Xcode project `ios/WorldClock.xcodeproj`). See the [iPhone app guide](docs/ios-guide.md) |
 
 ## License
 

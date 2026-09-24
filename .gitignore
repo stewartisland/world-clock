@@ -1,3 +1,8 @@
 ﻿bin/
 obj/
 publish/
+
+# Xcode (ios/)
+xcuserdata/
+DerivedData/
+ios/build/
