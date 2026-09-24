@@ -54,7 +54,7 @@ The project uses folder-synced groups, so any file you add under `ios/WorldClock
 | `SettingsService.swift` | Loads and saves `clocks.json`. Holds the default clocks | `SettingsService.cs` |
 | `ThemeManager.swift` | Applies Light / Dark / Use iPhone setting to every window | `ThemeManager.cs` |
 | `Models.swift` | `ClockConfig`, `AppSettings`, `PlaceResult`, `CurrentWeather` | `Models.cs` |
-| `Assets.xcassets` | Colours (light and dark) and the app icon | `Themes/*.xaml` |
+| `Assets.xcassets` | Colours (light and dark) and the app icon (light, dark and tinted) | `Themes/*.xaml` |
 
 Differences from the Windows app:
 
@@ -72,6 +72,14 @@ To reset the app, delete it from the iPhone or simulator.
 
 Colours come only from the colour sets in `Assets.xcassets`, which have the same light and dark values as `Themes/Light.xaml` and `Themes/Dark.xaml`. Use them through the generated symbols (`.textPrimary`, `.cardBackground`, `.linkText` and so on), never as literal colours. If you add a colour on one platform, add it to the other as well.
 
+### App icon
+
+The icon is a clock face over a globe, drawn by `scripts/make-app-icon.swift` in light, dark and tinted versions for the matching home screen styles. To change it, edit the colours or shapes in the script and run it again:
+
+```bash
+swift scripts/make-app-icon.swift ios/WorldClock/Assets.xcassets/AppIcon.appiconset
+```
+
 ### Tests
 
 `ios/WorldClockTests` uses Swift Testing. It covers offset and temperature text, weather icons, staleness, Open-Meteo parsing, settings load and save (including newer-version files), and the store's reorder, rename and weather matching. The tests don't use the network.
@@ -86,6 +94,5 @@ pwsh -File scripts/bump-version.ps1 minor -Notes "What changed" -Commit
 
 ## Known limitations
 
-- The app icon is an empty placeholder. Add a 1024 × 1024 PNG to `Assets.xcassets/AppIcon.appiconset` before you ship to the App Store.
 - There's no home screen widget yet.
 - Open-Meteo's free service is non-commercial only. Selling the app on the App Store counts as commercial use (see [Licensing of weather data](developer-guide.md#licensing-of-weather-data)).

@@ -62,6 +62,7 @@ The app is written to `publish\WorldClock.exe`. Close any running copy before yo
 | `OpenMeteo.cs` | Weather and place search from Open-Meteo, behind `IWeatherService` / `IPlaceSearch` |
 | `Models.cs` | `ClockConfig`, `AppSettings`, `PlaceResult`, `CurrentWeather` |
 | `WorldClock.csproj` | Project file (targets `net9.0-windows` with WPF). Holds the app version |
+| `scripts/make-app-icon.swift` | Draws the iPhone app icon (light, dark and tinted) |
 | `scripts/bump-version.ps1` | Raises the version (major or minor) of both apps and updates `CHANGELOG.md` |
 | `ios/` | The iPhone app (SwiftUI, Xcode project `ios/WorldClock.xcodeproj`). See the [iPhone app guide](docs/ios-guide.md) |
 
