@@ -148,6 +148,29 @@ The script:
 
 Without `-Commit`, it only edits the two files, so you can include them in your own commit. Then publish the exe as usual.
 
+## Packaging
+
+`scripts/package.ps1` builds an installable zip for another Windows PC:
+
+```powershell
+powershell -File scripts/package.ps1            # latest v* tag
+powershell -File scripts/package.ps1 -Tag v1.4  # a specific release
+```
+
+It checks the tag out into a temporary git worktree, so your working copy and branch aren't touched. It then publishes a **self-contained, compressed single-file** `WorldClock.exe` (about 60 MB, including the .NET runtime, so the target PC needs nothing installed), and writes `dist\WorldClock-<version>-win-x64.zip` (about 55 MB). `dist/` is git-ignored. Run it on Windows.
+
+The zip contains the exe plus the files in [`packaging/`](../packaging):
+
+| File | What it does |
+| --- | --- |
+| `Install.cmd` / `Install.ps1` | Per-user install, with no admin rights. Copies the exe to `%LOCALAPPDATA%\Programs\World Clock`, clears the "downloaded from the internet" mark, adds a Start menu shortcut (and optionally a desktop one), and registers the app in **Settings → Apps** (`HKCU\...\Uninstall\WorldClock`). If the app is already installed, it closes the running copy and replaces it |
+| `Uninstall.cmd` / `Uninstall.ps1` | Removes the app, the shortcuts and the Apps entry. It asks before deleting `%APPDATA%\WorldClock` (the user's clocks) |
+| `README.txt` | Install instructions for whoever receives the zip. `{VERSION}` is filled in by the script |
+
+Both scripts accept `-Quiet` to skip the prompts and not launch the app, which is useful for testing. The installer files always come from your current working copy, so fixes to them apply when you package an older tag.
+
+The exe isn't code-signed, so SmartScreen shows "Windows protected your PC" the first time it runs. The README explains **More info → Run anyway**. Removing that warning needs a code-signing certificate.
+
 ## Common changes
 
 | Change | Where |

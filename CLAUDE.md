@@ -19,6 +19,8 @@ The iPhone app is in `ios/` (SwiftUI, see [docs/ios-guide.md](docs/ios-guide.md)
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild test -project ios/WorldClock.xcodeproj -scheme WorldClock -destination 'platform=iOS Simulator,name=iPhone 17'
 ```
 
+To make an installable zip for another Windows PC (from the latest release tag), run `powershell -File scripts/package.ps1`. The output goes to `dist/`, which is git-ignored.
+
 ## Releasing: bump the version every time
 
 Every change shipped to `main` gets a version bump, using Major.Minor:

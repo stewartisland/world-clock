@@ -39,6 +39,14 @@ dotnet publish WorldClock.csproj -c Release -r win-x64 --self-contained false -p
 
 The app is written to `publish\WorldClock.exe`. Close any running copy before you publish, because a running copy locks the file and the publish will fail.
 
+### Installing on another PC
+
+```powershell
+powershell -File scripts/package.ps1
+```
+
+This builds `dist\WorldClock-<version>-win-x64.zip` from the latest release tag. Copy it to the other PC, extract it and run **Install.cmd**. The exe is self-contained, so that PC doesn't need .NET, and installing doesn't need admin rights. See [Packaging](docs/developer-guide.md#packaging) for details.
+
 ## Documentation
 
 - [User guide](docs/user-guide.md): how to use the app, where settings are stored and how to reset them
@@ -62,6 +70,7 @@ The app is written to `publish\WorldClock.exe`. Close any running copy before yo
 | `OpenMeteo.cs` | Weather and place search from Open-Meteo, behind `IWeatherService` / `IPlaceSearch` |
 | `Models.cs` | `ClockConfig`, `AppSettings`, `PlaceResult`, `CurrentWeather` |
 | `WorldClock.csproj` | Project file (targets `net9.0-windows` with WPF). Holds the app version |
+| `scripts/package.ps1`, `packaging/` | Builds the installable zip for another Windows PC, and the installer files that go in it |
 | `scripts/make-app-icon.swift` | Draws the iPhone app icon (light, dark and tinted) |
 | `scripts/bump-version.ps1` | Raises the version (major or minor) of both apps and updates `CHANGELOG.md` |
 | `ios/` | The iPhone app (SwiftUI, Xcode project `ios/WorldClock.xcodeproj`). See the [iPhone app guide](docs/ios-guide.md) |
